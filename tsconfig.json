@@ -3,8 +3,8 @@
     "target": "es6",
     "lib": ["es6"],
     "strict": true,
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "types": ["@figma/plugin-typings"],
     "skipLibCheck": true
   }
