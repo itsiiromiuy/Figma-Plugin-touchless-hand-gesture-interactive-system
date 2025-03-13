@@ -4,6 +4,8 @@
     "lib": ["es6"],
     "strict": true,
     "module": "ESNext",
+    "outDir": "dist",
+    "rootDir": "src",
     "moduleResolution": "Bundler",
     "types": ["@figma/plugin-typings"],
     "skipLibCheck": true

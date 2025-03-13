@@ -1,4 +1,28 @@
+import { WebSocketClient } from "./websocket";
 
+let wsClient: WebSocketClient | null = null;
+
+if (figma.editorType === "figma") {
+  figma.showUI(__html__, { width: 300, height: 200 });
+
+  figma.ui.onmessage = (msg: { type: string }) => {
+    if (msg.type === "connect-websocket") {
+      if (!wsClient) {
+
+        wsClient = new WebSocketClient("ws://localhost:8081");
+        figma.notify("Connecting to WebSocket...");
+      } else {
+        figma.notify("Already connected!");
+      }
+    } else if (msg.type === "disconnect-websocket" && wsClient) {
+      wsClient.closeConnection();
+      wsClient = null;
+      figma.notify("Disconnected from WebSocket");
+    }
+  };
+}
+
+/** 
 // This file holds the main code for plugins. Code in this file has access to
 // the *figma document* via the figma global object.
 // You can access browser APIs in the <script> tag inside "ui.html" which has a
@@ -127,3 +151,4 @@ if (figma.editorType === "slides") {
     figma.closePlugin();
   };
 }
+*/

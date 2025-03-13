@@ -1,18 +1,21 @@
-<h2>Connect to WebSocket</h2>
-<button id="create">Connect</button>
-<button id="cancel">DisConnect</button>
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Plugin</title>
+</head>
+<body>
+    <h2>Connect to WebSocket</h2>
+    <button id="connectWebSocket">Connect</button>
+    <button id="disConnectWebSocket">DisConnect</button>
+    <script>
+        document.getElementById("connectWebSocket").onclick = () => {
+            parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
+        };
 
-document.getElementById('create').onclick = () => {
-  const textbox = document.getElementById('count');
-  const count = parseInt(textbox.value, 10);
-  parent.postMessage({ pluginMessage: { type: 'create-shapes', count } }, '*')
-}
-
-document.getElementById('cancel').onclick = () => {
-  parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
-}
-
- 
-
-</script>
+        document.getElementById("disConnectWebSocket").onclick = () => {
+            parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
+        };
+    </script>
+</body>
+</html>
