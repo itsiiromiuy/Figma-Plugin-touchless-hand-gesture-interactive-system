@@ -2,15 +2,16 @@
   "name": "hand-gesture-control",
   "version": "1.0.0",
   "description": "Your Figma Plugin",
-  "main": "code.js",
+  "main":"code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run build -- --watch"
+    "build": "webpack",
+    "watch": "webpack --watch"
   },
   "author": "",
   "license": "",
+  "keywords": [
+    "figma-plugin"
+  ],
   "devDependencies": {
     "@figma/eslint-plugin-figma-plugins": "*",
     "@figma/plugin-typings": "^1.108.0",
@@ -18,7 +19,14 @@
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
     "eslint": "^8.54.0",
-    "typescript": "^5.3.2"
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ws": "^8.18.1"
   },
   "eslintConfig": {
     "extends": [
@@ -41,8 +49,5 @@
         }
       ]
     }
-  },
-  "dependencies": {
-    "ws": "^8.18.1"
   }
 }

@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>WebSocket Plugin</title>
-</head>
-<body>
-    <h2>Connect to WebSocket</h2>
-    <button id="connectWebSocket">Connect</button>
-    <button id="disConnectWebSocket">DisConnect</button>
-    <script>
-        document.getElementById("connectWebSocket").onclick = () => {
-            parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
-        };
+<button id="connectWebSocket">Connect</button>
+<button id="disConnectWebSocket">Disconnect</button>
 
-        document.getElementById("disConnectWebSocket").onclick = () => {
-            parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
-        };
-    </script>
-</body>
-</html>
+<script>
+  document.getElementById("connectWebSocket").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
+  };
+
+  document.getElementById("disConnectWebSocket").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
+  };
+</script>

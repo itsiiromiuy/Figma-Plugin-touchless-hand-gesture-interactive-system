@@ -1,9 +1,7 @@
-import WebSocket from "ws";
-
 export class WebSocketClient {
   private ws: WebSocket;
 
-  constructor(url: string = "ws://localhost:8080") {
+  constructor(url: string) {
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
@@ -11,19 +9,17 @@ export class WebSocketClient {
       figma.notify("✅ Connected to WebSocket!");
       this.sendMessage("Hello from Figma Plugin!");
     };
-
+// 
     this.ws.onmessage = (event) => {
       console.log("📩 Message from server:", event.data);
       figma.notify(`📩 Received: ${event.data}`);
     };
 
-    this.ws.onerror = (error) => {
-      console.error("❌ WebSocket error:", error);
+    this.ws.onerror = () => {
       figma.notify("❌ WebSocket error!");
     };
 
     this.ws.onclose = () => {
-      console.log("🔌 WebSocket closed");
       figma.notify("🔌 Disconnected from WebSocket");
     };
   }
