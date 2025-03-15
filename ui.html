@@ -1,12 +1,115 @@
-<button id="connectWebSocket">Connect</button>
-<button id="disConnectWebSocket">Disconnect</button>
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 10px;
+      background-color: #18A0FB;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0D8CDF;
+    }
+  </style>
+</head>
+<body>
+  <h3>Hand Gesture Control</h3>
+  <button id="connectWebSocket">Connect</button>
+  <button id="disConnectWebSocket">Disconnect</button>
+  <div id="status">Status: Disconnected</div>
 
-<script>
-  document.getElementById("connectWebSocket").onclick = () => {
-    parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
-  };
+  <script>
+    let ws = null;
+    const statusElement = document.getElementById("status");
+    
+    // 連接到 WebSocket
+    document.getElementById("connectWebSocket").onclick = () => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        try {
+          statusElement.textContent = "Status: Connecting...";
+          ws = new WebSocket("ws://localhost:8081");
+          
+          ws.onopen = () => {
+            console.log("✅ Connected to WebSocket server");
+            statusElement.textContent = "Status: Connected";
+            parent.postMessage({ pluginMessage: { type: "WS_OPEN" } }, "*");
+            ws.send("Hello from Figma Plugin!");
+          };
+          
+          ws.onmessage = (event) => {
+            console.log("📩 Message from server:", event.data);
+            parent.postMessage({ 
+              pluginMessage: { 
+                type: "WS_DATA", 
+                payload: event.data 
+              } 
+            }, "*");
+          };
+          
+          ws.onerror = (error) => {
+            console.error("WebSocket error:", error);
+            statusElement.textContent = "Status: Error";
+            parent.postMessage({ 
+              pluginMessage: { 
+                type: "WS_ERROR", 
+                payload: "Connection error" 
+              } 
+            }, "*");
+          };
+          
+          ws.onclose = () => {
+            console.log("🔌 Disconnected from WebSocket");
+            statusElement.textContent = "Status: Disconnected";
+            parent.postMessage({ 
+              pluginMessage: { 
+                type: "WS_CLOSE" 
+              } 
+            }, "*");
+          };
+        } catch (error) {
+          console.error("Failed to create WebSocket:", error);
+          statusElement.textContent = "Status: Connection Failed";
+          parent.postMessage({ 
+            pluginMessage: { 
+              type: "WS_ERROR", 
+              payload: "Failed to create connection" 
+            } 
+          }, "*");
+        }
+      }
+      
+      // 通知主線程
+      parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
+    };
 
-  document.getElementById("disConnectWebSocket").onclick = () => {
-    parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
-  };
-</script>
+    // 斷開 WebSocket 連接
+    document.getElementById("disConnectWebSocket").onclick = () => {
+      if (ws) {
+        ws.close();
+        ws = null;
+        statusElement.textContent = "Status: Disconnected";
+        // 通知主線程
+        parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
+      }
+    };
+    
+    // 監聽來自主線程的消息
+    window.onmessage = (event) => {
+      const message = event.data.pluginMessage;
+      
+      if (message && message.type === "send-ws-message" && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(message.payload);
+      }
+    };
+  </script>
+</body>
+</html>

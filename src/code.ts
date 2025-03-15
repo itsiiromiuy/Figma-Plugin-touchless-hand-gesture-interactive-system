@@ -1,163 +1,30 @@
-import { WebSocketClient } from "./websocket";
+figma.showUI(__html__, { width: 300, height: 200 });
 
-let wsClient: WebSocketClient | null = null;
-
-function connectWebSocket() {
-  if (!wsClient) {
-    wsClient = new WebSocketClient("ws://localhost:8081");
-    figma.notify("Connecting to WebSocket...");
-  } else {
-    figma.notify("Already connected!");
-  }
-}
-
-function disconnectWebSocket() {
-  if (wsClient) {
-    wsClient.closeConnection();
-    wsClient = null;
+figma.ui.onmessage = (message) => {
+  if (message.type === "WS_DATA") {
+    const receivedData = message.payload;
+    // 處理接收到的數據（例如，創建節點，更新 Figma 文檔等）
+    console.log("Data from WebSocket:", receivedData);
+  } else if (message.type === "WS_ERROR") {
+    figma.notify("WebSocket error: " + message.payload); // 例如，通知用戶
+  } else if (message.type === "WS_OPEN") {
+    console.log("WebSocket connection opened in UI");
+    figma.notify("Connected to WebSocket!");
+  } else if (message.type === "WS_CLOSE") {
     figma.notify("Disconnected from WebSocket");
-  } else {
-    figma.notify("No active WebSocket connection!");
+  } else if (message.type === "connect-websocket") {
+    // 用戶點擊了連接按鈕
+    figma.notify("Attempting to connect to WebSocket...");
+  } else if (message.type === "disconnect-websocket") {
+    // 用戶點擊了斷開連接按鈕
+    figma.notify("Disconnecting from WebSocket...");
   }
+};
+
+// 如果需要從主線程發送消息到 WebSocket 服務器
+function sendWebSocketMessage(message: string) {
+  figma.ui.postMessage({
+    type: "send-ws-message",
+    payload: message,
+  });
 }
-
-if (figma.editorType === "figma") {
-  figma.showUI(__html__, { width: 300, height: 200 });
-
-  figma.ui.onmessage = (msg) => {
-    if (msg.type === "connect-websocket") {
-      connectWebSocket();
-    } else if (msg.type === "disconnect-websocket") {
-      disconnectWebSocket();
-    }
-  };
-}
-
-// // This file holds the main code for plugins. Code in this file has access to
-// // the *figma document* via the figma global object.
-// // You can access browser APIs in the <script> tag inside "ui.html" which has a
-// // full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
-
-// // Runs this code if the plugin is run in Figma
-// if (figma.editorType === "figma") {
-//   // This plugin will open a window to prompt the user to enter a number, and
-//   // it will then create that many rectangles on the screen.
-
-//   // This shows the HTML page in "ui.html".
-//   figma.showUI(__html__);
-
-//   // Calls to "parent.postMessage" from within the HTML page will trigger this
-//   // callback. The callback will be passed the "pluginMessage" property of the
-//   // posted message.
-//   figma.ui.onmessage = (msg: { type: string; count: number }) => {
-//     // One way of distinguishing between different types of messages sent from
-//     // your HTML page is to use an object with a "type" property like this.
-//     if (msg.type === "create-shapes") {
-//       // This plugin creates rectangles on the screen.
-//       const numberOfRectangles = msg.count;
-
-//       const nodes: SceneNode[] = [];
-//       for (let i = 0; i < numberOfRectangles; i++) {
-//         const rect = figma.createRectangle();
-//         rect.x = i * 150;
-//         rect.fills = [{ type: "SOLID", color: { r: 1, g: 0.5, b: 0 } }];
-//         figma.currentPage.appendChild(rect);
-//         nodes.push(rect);
-//       }
-//       figma.currentPage.selection = nodes;
-//       figma.viewport.scrollAndZoomIntoView(nodes);
-//     }
-
-//     // Make sure to close the plugin when you're done. Otherwise the plugin will
-//     // keep running, which shows the cancel button at the bottom of the screen.
-//     figma.closePlugin();
-//   };
-// }
-
-// // Runs this code if the plugin is run in FigJam
-// if (figma.editorType === "figjam") {
-//   // This plugin will open a window to prompt the user to enter a number, and
-//   // it will then create that many shapes and connectors on the screen.
-
-//   // This shows the HTML page in "ui.html".
-//   figma.showUI(__html__);
-
-//   // Calls to "parent.postMessage" from within the HTML page will trigger this
-//   // callback. The callback will be passed the "pluginMessage" property of the
-//   // posted message.
-//   figma.ui.onmessage = (msg: { type: string; count: number }) => {
-//     // One way of distinguishing between different types of messages sent from
-//     // your HTML page is to use an object with a "type" property like this.
-//     if (msg.type === "create-shapes") {
-//       // This plugin creates shapes and connectors on the screen.
-//       const numberOfShapes = msg.count;
-
-//       const nodes: SceneNode[] = [];
-//       for (let i = 0; i < numberOfShapes; i++) {
-//         const shape = figma.createShapeWithText();
-//         // You can set shapeType to one of: 'SQUARE' | 'ELLIPSE' | 'ROUNDED_RECTANGLE' | 'DIAMOND' | 'TRIANGLE_UP' | 'TRIANGLE_DOWN' | 'PARALLELOGRAM_RIGHT' | 'PARALLELOGRAM_LEFT'
-//         shape.shapeType = "ROUNDED_RECTANGLE";
-//         shape.x = i * (shape.width + 200);
-//         shape.fills = [{ type: "SOLID", color: { r: 1, g: 0.5, b: 0 } }];
-//         figma.currentPage.appendChild(shape);
-//         nodes.push(shape);
-//       }
-
-//       for (let i = 0; i < numberOfShapes - 1; i++) {
-//         const connector = figma.createConnector();
-//         connector.strokeWeight = 8;
-
-//         connector.connectorStart = {
-//           endpointNodeId: nodes[i].id,
-//           magnet: "AUTO",
-//         };
-
-//         connector.connectorEnd = {
-//           endpointNodeId: nodes[i + 1].id,
-//           magnet: "AUTO",
-//         };
-//       }
-
-//       figma.currentPage.selection = nodes;
-//       figma.viewport.scrollAndZoomIntoView(nodes);
-//     }
-
-//     // Make sure to close the plugin when you're done. Otherwise the plugin will
-//     // keep running, which shows the cancel button at the bottom of the screen.
-//     figma.closePlugin();
-//   };
-// }
-
-// // Runs this code if the plugin is run in Slides
-// if (figma.editorType === "slides") {
-//   // This plugin will open a window to prompt the user to enter a number, and
-//   // it will then create that many slides on the screen.
-
-//   // This shows the HTML page in "ui.html".
-//   figma.showUI(__html__);
-
-//   // Calls to "parent.postMessage" from within the HTML page will trigger this
-//   // callback. The callback will be passed the "pluginMessage" property of the
-//   // posted message.
-//   figma.ui.onmessage = (msg: { type: string; count: number }) => {
-//     // One way of distinguishing between different types of messages sent from
-//     // your HTML page is to use an object with a "type" property like this.
-//     if (msg.type === "create-shapes") {
-//       // This plugin creates slides and puts the user in grid view.
-//       const numberOfSlides = msg.count;
-
-//       const nodes: SlideNode[] = [];
-//       for (let i = 0; i < numberOfSlides; i++) {
-//         const slide = figma.createSlide();
-//         nodes.push(slide);
-//       }
-
-//       figma.viewport.slidesView = "grid";
-//       figma.currentPage.selection = nodes;
-//     }
-
-//     // Make sure to close the plugin when you're done. Otherwise the plugin will
-//     // keep running, which shows the cancel button at the bottom of the screen.
-//     figma.closePlugin();
-//   };
-// }
