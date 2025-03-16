@@ -5,7 +5,6 @@ export class WebSocketClient {
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
-      console.log("✅ Connected to WebSocket server");
       figma.notify("✅ Connected to WebSocket!");
       this.sendMessage("Hello from Figma Plugin!");
     };
