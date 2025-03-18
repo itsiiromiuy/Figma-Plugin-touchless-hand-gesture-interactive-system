@@ -8,9 +8,8 @@ export class WebSocketClient {
       figma.notify("✅ Connected to WebSocket!");
       this.sendMessage("Hello from Figma Plugin!");
     };
-    
+
     this.ws.onmessage = (event) => {
-      console.log("📩 Message from server:", event.data);
       figma.notify(`📩 Received: ${event.data}`);
     };
 
