@@ -2,7 +2,7 @@
   "name": "hand-gesture-control",
   "version": "1.0.0",
   "description": "Your Figma Plugin",
-  "main":"code.js",
+  "main": "code.js",
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch"

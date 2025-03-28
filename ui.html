@@ -30,8 +30,6 @@
   <script>
     let ws = null;
     const statusElement = document.getElementById("status");
-    
-    // 連接到 WebSocket
     document.getElementById("connectWebSocket").onclick = () => {
       if (!ws || ws.readyState !== WebSocket.OPEN) {
         try {
@@ -87,22 +85,22 @@
         }
       }
       
-      // 通知主線程
+      // if the connection is already open, just notify the main thread
       parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
     };
 
-    // 斷開 WebSocket 連接
+    // disconnect button
     document.getElementById("disConnectWebSocket").onclick = () => {
       if (ws) {
         ws.close();
         ws = null;
         statusElement.textContent = "Status: Disconnected";
-        // 通知主線程
+        // motify main thread
         parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
       }
     };
     
-    // 監聽來自主線程的消息
+    // monitor messages from the main thread
     window.onmessage = (event) => {
       const message = event.data.pluginMessage;
       
