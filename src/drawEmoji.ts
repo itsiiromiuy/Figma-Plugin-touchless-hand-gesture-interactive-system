@@ -39,11 +39,11 @@ export default function drawEmoji(receivedData: ReceivedData[]) {
         showOkImage();
       }
       break;
-    case FULL_HAND_UP_SIGN:
-      if (emojiName !== FULL_HAND_UP_SIGN) {
-        showHandUpImage();
-      }
-      break;
+    // case FULL_HAND_UP_SIGN:
+    //   if (emojiName !== FULL_HAND_UP_SIGN) {
+    //     showHandUpImage();
+    //   }
+    //   break;
     case THUMBS_DOWN_SIGN:
       if (emojiName !== THUMBS_DOWN_SIGN) {
         showThumbDownImage();
@@ -55,7 +55,12 @@ export default function drawEmoji(receivedData: ReceivedData[]) {
 }
 const showImage = (imageSource: string, newEmojiName: string) => {
   figma.createImageAsync(imageSource).then(async (image: Image) => {
-    // Create a rectangle that's the same dimensions as the image.
+    // Remove the previous emojiElement, if it exists.
+    if (emojiElement !== null) {
+      console.log(emojiElement)
+      emojiElement.remove();
+    }
+     // Create a rectangle that's the same dimensions as the image.
     const node = figma.createRectangle();
     //The width and height of the image in pixels. This returns a promise because the image may still need to be downloaded (images in Figma are loaded separately from the rest of the document).
     const { width, height } = await image.getSizeAsync();
@@ -69,10 +74,6 @@ const showImage = (imageSource: string, newEmojiName: string) => {
         scaleMode: "FILL",
       },
     ];
-    // Remove the previous emojiElement, if it exists.
-    if (emojiElement !== null) {
-      emojiElement.remove();
-    }
 
     // Update the emojiElement with the new image.
     emojiElement = node;
@@ -82,9 +83,9 @@ const showImage = (imageSource: string, newEmojiName: string) => {
   });
 };
 
-function showHandUpImage() {
-  showImage(Support, FULL_HAND_UP_SIGN);
-}
+// function showHandUpImage() {
+//   showImage(Support, FULL_HAND_UP_SIGN);
+// }
 
 function showThumbUpImage() {
   showImage(ThumbUp, THUMBS_UP_SIGN);
