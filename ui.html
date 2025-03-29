@@ -1,113 +1,145 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    button {
-      padding: 8px 16px;
-      margin: 10px;
-      background-color: #18A0FB;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0D8CDF;
-    }
-  </style>
-</head>
-<body>
-  <h3>Hand Gesture Control</h3>
-  <button id="connectWebSocket">Connect</button>
-  <button id="disConnectWebSocket">Disconnect</button>
-  <div id="status">Status: Disconnected</div>
+  <head>
+    <style>
+      body {
+        font-family: "Courier New", Courier, monospace;
+        text-align: center;
+        padding: 10px;
+      }
+      button {
+        font-family: "Courier New", Courier, monospace;
+        padding: 8px 16px;
+        margin-bottom: 10px;
+        font-weight: 400;
+        cursor: pointer;
+        background-color: #ffffff;
+        color: #0409ff;
+        border: 1px, solid, #0409ff;
+      }
+      button:hover {
+        background-color: #0409ff;
+        color: white;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h4 style="font-size: 14px">👉 Figma Hand Gesture Plugin
+</h4>
+    <p style="font-size: 12px">
+      Real-time hand gestures control, powered by TensorFlow.js
+    </p>
+    <button id="connectWebSocket">Connect</button>
+    <button id="disConnectWebSocket">Disconnect</button>
+    <div id="status" style="font-size: 12px">
+      Waiting for connecting to websocket...
+    </div>
 
-  <script>
-    let ws = null;
-    const statusElement = document.getElementById("status");
-    document.getElementById("connectWebSocket").onclick = () => {
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        try {
-          statusElement.textContent = "Status: Connecting...";
-          ws = new WebSocket("ws://localhost:8081");
-          
-          ws.onopen = () => {
-            console.log("✅ Connected to WebSocket server");
-            statusElement.textContent = "Status: Connected";
-            parent.postMessage({ pluginMessage: { type: "WS_OPEN" } }, "*");
-            ws.send("Hello from Figma Plugin!");
-          };
-          
-          ws.onmessage = (event) => {
-            console.log("📩 Message from server:", event.data);
-            parent.postMessage({ 
-              pluginMessage: { 
-                type: "WS_DATA", 
-                payload: event.data 
-              } 
-            }, "*");
-          };
-          
-          ws.onerror = (error) => {
-            console.error("WebSocket error:", error);
-            statusElement.textContent = "Status: Error";
-            parent.postMessage({ 
-              pluginMessage: { 
-                type: "WS_ERROR", 
-                payload: "Connection error" 
-              } 
-            }, "*");
-          };
-          
-          ws.onclose = () => {
-            console.log("🔌 Disconnected from WebSocket");
-            statusElement.textContent = "Status: Disconnected";
-            parent.postMessage({ 
-              pluginMessage: { 
-                type: "WS_CLOSE" 
-              } 
-            }, "*");
-          };
-        } catch (error) {
-          console.error("Failed to create WebSocket:", error);
-          statusElement.textContent = "Status: Connection Failed";
-          parent.postMessage({ 
-            pluginMessage: { 
-              type: "WS_ERROR", 
-              payload: "Failed to create connection" 
-            } 
-          }, "*");
+    <script>
+      let ws = null;
+      const statusElement = document.getElementById("status");
+      document.getElementById("connectWebSocket").onclick = () => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+          try {
+            statusElement.textContent = "Status: Connecting...";
+            ws = new WebSocket("ws://localhost:8081");
+
+            ws.onopen = () => {
+              console.log("✅ Connected to WebSocket server");
+              statusElement.textContent = "🦔 Current Status: Connected";
+              parent.postMessage({ pluginMessage: { type: "WS_OPEN" } }, "*");
+              ws.send("Hello from Figma Plugin!");
+            };
+
+            ws.onmessage = (event) => {
+              console.log("📩 Message from server:", event.data);
+              parent.postMessage(
+                {
+                  pluginMessage: {
+                    type: "WS_DATA",
+                    payload: event.data,
+                  },
+                },
+                "*"
+              );
+            };
+
+            ws.onerror = (error) => {
+              console.error("WebSocket error:", error);
+              statusElement.textContent = "Status: Error";
+              parent.postMessage(
+                {
+                  pluginMessage: {
+                    type: "WS_ERROR",
+                    payload: "Connection error",
+                  },
+                },
+                "*"
+              );
+            };
+
+            ws.onclose = () => {
+              console.log("🔌 Disconnected from WebSocket");
+              statusElement.textContent = "🦔 Current Status: Disconnected";
+              parent.postMessage(
+                {
+                  pluginMessage: {
+                    type: "WS_CLOSE",
+                  },
+                },
+                "*"
+              );
+            };
+          } catch (error) {
+            console.error("Failed to create WebSocket:", error);
+            statusElement.textContent = "Status: Connection Failed";
+            parent.postMessage(
+              {
+                pluginMessage: {
+                  type: "WS_ERROR",
+                  payload: "Failed to create connection",
+                },
+              },
+              "*"
+            );
+          }
         }
-      }
-      
-      // if the connection is already open, just notify the main thread
-      parent.postMessage({ pluginMessage: { type: "connect-websocket" } }, "*");
-    };
 
-    // disconnect button
-    document.getElementById("disConnectWebSocket").onclick = () => {
-      if (ws) {
-        ws.close();
-        ws = null;
-        statusElement.textContent = "Status: Disconnected";
-        // motify main thread
-        parent.postMessage({ pluginMessage: { type: "disconnect-websocket" } }, "*");
-      }
-    };
-    
-    // monitor messages from the main thread
-    window.onmessage = (event) => {
-      const message = event.data.pluginMessage;
-      
-      if (message && message.type === "send-ws-message" && ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(message.payload);
-      }
-    };
-  </script>
-</body>
+        // if the connection is already open, just notify the main thread
+        parent.postMessage(
+          { pluginMessage: { type: "connect-websocket" } },
+          "*"
+        );
+      };
+
+      // disconnect button
+      document.getElementById("disConnectWebSocket").onclick = () => {
+        if (ws) {
+          ws.close();
+          ws = null;
+          statusElement.textContent = "🦔Status: Disconnected";
+          // motify main thread
+          parent.postMessage(
+            { pluginMessage: { type: "disconnect-websocket" } },
+            "*"
+          );
+        }
+      };
+
+      // monitor messages from the main thread
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+
+        if (
+          message &&
+          message.type === "send-ws-message" &&
+          ws &&
+          ws.readyState === WebSocket.OPEN
+        ) {
+          ws.send(message.payload);
+        }
+      };
+    </script>
+  </body>
 </html>

@@ -57,10 +57,10 @@ const showImage = (imageSource: string, newEmojiName: string) => {
   figma.createImageAsync(imageSource).then(async (image: Image) => {
     // Remove the previous emojiElement, if it exists.
     if (emojiElement !== null) {
-      console.log(emojiElement)
+      console.log(emojiElement);
       emojiElement.remove();
     }
-     // Create a rectangle that's the same dimensions as the image.
+    // Create a rectangle that's the same dimensions as the image.
     const node = figma.createRectangle();
     //The width and height of the image in pixels. This returns a promise because the image may still need to be downloaded (images in Figma are loaded separately from the rest of the document).
     const { width, height } = await image.getSizeAsync();
