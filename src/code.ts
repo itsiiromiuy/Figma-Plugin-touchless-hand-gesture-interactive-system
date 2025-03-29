@@ -1,7 +1,16 @@
 import ThumbUp from "./images/thumb_up.png";
 import Victory from "./images/victory.png";
-import Support from "./images/support.png"
-import Ok from "./images/ok.png"
+import Support from "./images/support.png";
+import Ok from "./images/ok.png";
+import ThumbDown from "./images/thumb_down.png"
+import {
+  THUMBS_UP_SIGN,
+  VICTORY_SIGN,
+  OK_SIGN,
+  FULL_HAND_UP_SIGN,
+  THUMBS_DOWN_SIGN
+} from "./emojiConstants";
+
 figma.showUI(__html__, { width: 300, height: 200 });
 
 let emojiElement: RectangleNode | null = null;
@@ -17,11 +26,6 @@ type ReceivedData = {
   height: number;
 };
 
-const THUMBS_UP_SIGN = "thumbs_up";
-const VICTORY_SIGN = "U_SIGN";
-const OK_SIGN = "OK_SIGN";
-const FULL_HAND_UP_SIGN = "FULL_HAND_UP";
-
 figma.ui.onmessage = (message) => {
   if (message.type === "WS_DATA") {
     const receivedData: ReceivedData[] = JSON.parse(message.payload);
@@ -36,25 +40,32 @@ figma.ui.onmessage = (message) => {
     });
 
     const gestureType = matchedData?.gestures[0].name;
+    if (!matchedData) return;
+
     switch (gestureType) {
       case THUMBS_UP_SIGN:
-        if (matchedData && emojiName !== THUMBS_UP_SIGN) {
+        if (emojiName !== THUMBS_UP_SIGN) {
           showThumbUpImage();
         }
         break;
       case VICTORY_SIGN:
-        if (matchedData && emojiName !== VICTORY_SIGN) {
+        if (emojiName !== VICTORY_SIGN) {
           showVictoryImage();
         }
         break;
       case OK_SIGN:
-        if (matchedData && emojiName !== OK_SIGN) {
+        if (emojiName !== OK_SIGN) {
           showOkImage();
         }
         break;
       case FULL_HAND_UP_SIGN:
-        if (matchedData && emojiName !== FULL_HAND_UP_SIGN) {
+        if (emojiName !== FULL_HAND_UP_SIGN) {
           showHandUpImage();
+        }
+        break;
+      case THUMBS_DOWN_SIGN:
+        if (emojiName !== THUMBS_DOWN_SIGN) {
+          showThumbDownImage();
         }
         break;
       default:
@@ -74,15 +85,15 @@ figma.ui.onmessage = (message) => {
   }
 };
 
-function showHandUpImage() {
-  figma.createImageAsync(Support).then(async (image: Image) => {
+const showImage = (imageSource: string, newEmojiName: string) => {
+  figma.createImageAsync(imageSource).then(async (image: Image) => {
     // Create a rectangle that's the same dimensions as the image.
     const node = figma.createRectangle();
-
+    //The width and height of the image in pixels. This returns a promise because the image may still need to be downloaded (images in Figma are loaded separately from the rest of the document).
     const { width, height } = await image.getSizeAsync();
     node.resize(width, height);
 
-    // Render the image by filling the rectangle.
+    //Render hte image by filling the rectangle.
     node.fills = [
       {
         type: "IMAGE",
@@ -90,83 +101,34 @@ function showHandUpImage() {
         scaleMode: "FILL",
       },
     ];
+    // Remove the previous emojiElement, if it exists.
     if (emojiElement !== null) {
       emojiElement.remove();
     }
+
+    // Update the emojiElement with the new image.
     emojiElement = node;
-    emojiName = FULL_HAND_UP_SIGN;
+
+    // Update the emojiName.
+    emojiName = newEmojiName; // Update the emoji name dynamically
   });
+};
+
+function showHandUpImage() {
+  showImage(Support, FULL_HAND_UP_SIGN);
 }
 
-// TODO add time out to delete image
 function showThumbUpImage() {
-  figma.createImageAsync(ThumbUp).then(async (image: Image) => {
-    // Create a rectangle that's the same dimensions as the image.
-    const node = figma.createRectangle();
-
-    const { width, height } = await image.getSizeAsync();
-    node.resize(width, height);
-
-    // Render the image by filling the rectangle.
-    node.fills = [
-      {
-        type: "IMAGE",
-        imageHash: image.hash,
-        scaleMode: "FILL",
-      },
-    ];
-    if (emojiElement !== null) {
-      emojiElement.remove();
-    }
-    emojiElement = node;
-    emojiName = THUMBS_UP_SIGN;
-  });
+  showImage(ThumbUp, THUMBS_UP_SIGN);
 }
 
 function showVictoryImage() {
-  figma.createImageAsync(Victory).then(async (image: Image) => {
-    // Create a rectangle that's the same dimensions as the image.
-    const node = figma.createRectangle();
-
-    const { width, height } = await image.getSizeAsync();
-    node.resize(width, height);
-
-    // Render the image by filling the rectangle.
-    node.fills = [
-      {
-        type: "IMAGE",
-        imageHash: image.hash,
-        scaleMode: "FILL",
-      },
-    ];
-    if (emojiElement !== null) {
-      emojiElement.remove();
-    }
-    emojiElement = node;
-    emojiName = VICTORY_SIGN;
-  });
+  showImage(Victory, VICTORY_SIGN);
 }
 
 function showOkImage() {
-  figma.createImageAsync(Ok).then(async (image: Image) => {
-    // Create a rectangle that's the same dimensions as the image.
-    const node = figma.createRectangle();
-
-    const { width, height } = await image.getSizeAsync();
-    node.resize(width, height);
-
-    // Render the image by filling the rectangle.
-    node.fills = [
-      {
-        type: "IMAGE",
-        imageHash: image.hash,
-        scaleMode: "FILL",
-      },
-    ];
-    if (emojiElement !== null) {
-      emojiElement.remove();
-    }
-    emojiElement = node;
-    emojiName = OK_SIGN;
-  });
+  showImage(Ok, OK_SIGN);
+}
+function showThumbDownImage() {
+  showImage(ThumbDown, THUMBS_DOWN_SIGN);
 }
