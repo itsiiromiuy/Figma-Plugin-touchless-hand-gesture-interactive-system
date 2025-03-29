@@ -1,9 +1,9 @@
+import dragToPosition from "./dragToPostion";
 import drawEmoji from "./drawEmoji";
+import pinchAndZoom from "./pinchAndZoom";
 import { ReceivedData } from "./types";
 
 figma.showUI(__html__, { width: 300, height: 200 });
-
- 
 
 figma.ui.onmessage = (message) => {
   if (message.type === "zoom") {
@@ -14,10 +14,9 @@ figma.ui.onmessage = (message) => {
       console.error("❌ Payload is not an array:", receivedData);
       return;
     }
-
     drawEmoji(receivedData);
-
-    // pinchAndZoom(receivedData);
+    dragToPosition(receivedData);
+    pinchAndZoom(receivedData);
   } else if (message.type === "WS_ERROR") {
     figma.notify("WebSocket error: " + message.payload);
   } else if (message.type === "WS_OPEN") {
@@ -31,4 +30,3 @@ figma.ui.onmessage = (message) => {
     figma.notify("Disconnecting from WebSocket...");
   }
 };
-
